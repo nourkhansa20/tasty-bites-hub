@@ -1,7 +1,7 @@
 const { Router } = require('express')
 const Comment = require('../database/modules/Comment');
 const Recipe = require('../database/modules/Recipe');
-const authenticateToken = require('../strategies/jwt')
+const { jwtCheck } = require('../strategies/auth0')
 
 const router = Router()
 
@@ -12,7 +12,7 @@ const router = Router()
 //     }
 // })
 
-router.get('/', authenticateToken,
+router.get('/', jwtCheck,
     async (req, res) => {
         try {
             const comments = await Comment.find();
@@ -22,7 +22,7 @@ router.get('/', authenticateToken,
         }
     })
 
-router.post('/create', authenticateToken,
+router.post('/create', jwtCheck,
     async (req, res) => {
         try {
             const { recipeId, text } = req.body;
@@ -53,7 +53,7 @@ router.post('/create', authenticateToken,
     })
 
 
-router.get('/:commentId', authenticateToken,
+router.get('/:commentId', jwtCheck,
     async (req, res) => {
         const { commentId } = req.params
 

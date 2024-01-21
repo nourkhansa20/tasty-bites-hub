@@ -25,16 +25,16 @@ require('./database/database')
 server.use(express.json())
 server.use(cors())
 server.use(cookie_parser())
-server.use(session({
-    secret: "Helloworld",
-    resave: false,
-    saveUninitialized: true,
-    store: MongoStore.create({
-        mongoUrl: "mongodb://localhost:27017/recipe-sharing-platform"
-    })
-}))
-server.use(passport.initialize())
-server.use(passport.session())
+// server.use(session({
+//     secret: "Helloworld",
+//     resave: false,
+//     saveUninitialized: true,
+//     store: MongoStore.create({
+//         mongoUrl: "mongodb://localhost:27017/recipe-sharing-platform"
+//     })
+// }))
+// server.use(passport.initialize())
+// server.use(passport.session())
 
 
 server.use('/api/auth/', authRoute)

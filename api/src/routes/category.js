@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Category = require('../database/modules/Category');
-const authenticateToken = require('../strategies/jwt')
+const { jwtCheck } = require('../strategies/auth0')
 
 // Route to insert a new category
-router.post('/', authenticateToken,
+router.post('/', jwtCheck,
     async (req, res) => {
         try {
             // Assuming req.body contains the JSON data to insert
@@ -18,7 +18,7 @@ router.post('/', authenticateToken,
         }
     });
 
-router.get('/', authenticateToken,
+router.get('/', jwtCheck,
     async (req, res) => {
         try {
             const category = await Category.find();

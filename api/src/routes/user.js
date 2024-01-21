@@ -1,10 +1,10 @@
 const { Router } = require('express')
 const User = require('../database/modules/User')
-const authenticateToken = require('../strategies/jwt')
+const { jwtCheck } = require('../strategies/auth0')
 const { default: mongoose } = require('mongoose')
 const router = Router()
 
-router.get('/',authenticateToken,
+router.get('/',jwtCheck,
     async (req, res) => {
         const userDB = await User.find()
         if (userDB) {
@@ -14,7 +14,7 @@ router.get('/',authenticateToken,
         }
     })
 
-router.get('/:email', authenticateToken,
+router.get('/:email', jwtCheck,
     async (req, res) => {
         const { email } = req.params
         const userDB = await User.findOne({ email })
@@ -26,7 +26,7 @@ router.get('/:email', authenticateToken,
         }
     })
 
-router.get('/id/:userId', authenticateToken,
+router.get('/id/:userId', jwtCheck,
     async (req, res) => {
         try {
             const { userId } = req.params
@@ -42,7 +42,7 @@ router.get('/id/:userId', authenticateToken,
 
     })
 
-router.post("/user-follow/:id", authenticateToken,
+router.post("/user-follow/:id", jwtCheck,
     async (req, res) => {
         try {
             const userFollowId = req.params.id;
@@ -81,7 +81,7 @@ router.post("/user-follow/:id", authenticateToken,
         }
     });
 
-router.get('/is-user-following/:followingId', authenticateToken,
+router.get('/is-user-following/:followingId', jwtCheck,
     async (req, res) => {
         try {
             const { followingId } = req.params;
@@ -104,7 +104,7 @@ router.get('/is-user-following/:followingId', authenticateToken,
             res.status(500).json({ message: 'Internal server error' });
         }
     });
-router.patch('/update-user', authenticateToken,
+router.patch('/update-user', jwtCheck,
     async (req, res) => {
         const { bio } = req.body
         const userDB = await User.findById(req.user._id)
