@@ -2,8 +2,8 @@ const { Router } = require('express')
 const User = require('../database/modules/User');
 const Recipe = require('../database/modules/Recipe');
 const Category = require('../database/modules/Category');
-
-const {jwtCheck} = require('../strategies/auth0')
+const axios = require('axios')
+const { jwtCheck } = require('../strategies/auth0')
 
 const path = require('path')
 
@@ -26,7 +26,7 @@ const router = Router()
 
 router.use(jwtCheck)
 
-router.get('/', 
+router.get('/',
     async (req, res) => {
         try {
             const categories = await Recipe.distinct('category', { category: { $exists: true, $ne: null } });
@@ -49,14 +49,14 @@ router.get('/',
     }
 )
 
-router.post('/create', 
+router.post('/create',
     async (req, res) => {
         try {
             const { title, ingredients, steps, cookingTime, difficultyLevel, servingSize, tags, category } = req.body;
 
             const newRecipe = new Recipe({
                 title,
-                author: req.user.sub,
+                author: req.user._id,
                 ingredients,
                 steps,
                 cookingTime,
@@ -67,7 +67,7 @@ router.post('/create',
             });
 
             await newRecipe.save();
-            await User.findByIdAndUpdate(req.user.sub, { $push: { recipes: newRecipe._id } });
+            await User.findByIdAndUpdate(req.user._id, { $push: { recipes: newRecipe._id } });
 
             res.status(201).json({ message: 'Recipe added successfully', recipe: newRecipe });
 
@@ -76,13 +76,13 @@ router.post('/create',
         }
     })
 
-router.post('/save-recipe-photo/:recipeId',  upload.single('photo'),
+router.post('/save-recipe-photo/:recipeId', upload.single('photo'),
     (req, res) => {
         res.status(200).json({ message: "image uploaded" })
     }
 )
 
-router.delete('/delete/:recipeId', 
+router.delete('/delete/:recipeId',
     async (req, res) => {
         try {
             const { recipeId } = req.params;
@@ -92,11 +92,11 @@ router.delete('/delete/:recipeId',
                 return res.status(404).json({ message: 'Recipe not found' });
             }
 
-            if (recipe.author.toString() !== req.user.sub.toString()) {
+            if (recipe.author.toString() !== req.user._id.toString()) {
                 return res.status(403).json({ message: 'You do not have permission to delete this recipe' });
             }
 
-            await User.findByIdAndUpdate(req.user.sub, { $pull: { recipes: recipeId } });
+            await User.findByIdAndUpdate(req.user._id, { $pull: { recipes: recipeId } });
 
             await Recipe.findByIdAndDelete(recipeId);
 
@@ -108,7 +108,7 @@ router.delete('/delete/:recipeId',
     });
 
 
-router.post('/add-to-favorites/:recipeId', 
+router.post('/add-to-favorites/:recipeId',
     async (req, res) => {
         try {
             const { recipeId } = req.params;
@@ -118,17 +118,16 @@ router.post('/add-to-favorites/:recipeId',
                 return res.status(404).json({ message: 'Recipe not found' });
             }
 
-            const userId = req.user.sub;
+            const userId = req.user._id;
 
-            // Check if the recipe is already in favorites
             const user = await User.findById(userId);
 
             if (user.favorites.includes(recipeId)) {
-                // Recipe is already in favorites, remove it
+
                 await User.findByIdAndUpdate(userId, { $pull: { favorites: recipeId } });
                 res.status(200).json({ message: false });
             } else {
-                // Recipe is not in favorites, add it
+
                 await User.findByIdAndUpdate(userId, { $addToSet: { favorites: recipeId } });
                 res.status(200).json({ message: true });
             }
@@ -138,21 +137,18 @@ router.post('/add-to-favorites/:recipeId',
         }
     });
 
-router.get('/is-favorite/:recipeId', 
+router.get('/is-favorite/:recipeId',
     async (req, res) => {
         try {
             const { recipeId } = req.params;
 
-            // Validate if the provided recipeId is a valid MongoDB ObjectId
             const recipe = await Recipe.findById(recipeId);
             if (!recipe) {
                 return res.status(404).json({ message: 'Recipe not found' });
             }
-            const userId = req.user.sub;
 
-            console.log(req.user)
+            const userId = req.user._id;
 
-            // Check if the recipe is in the user's favorites
             const user = await User.findById(userId);
 
             if (user.favorites.includes(recipeId)) {
@@ -166,7 +162,7 @@ router.get('/is-favorite/:recipeId',
         }
     });
 
-router.put('/update-recipe/:recipeId', 
+router.put('/update-recipe/:recipeId',
     async (req, res) => {
         try {
             const { recipeId } = req.params;
@@ -177,7 +173,7 @@ router.put('/update-recipe/:recipeId',
                 return res.status(404).json({ message: 'Recipe not found' });
             }
 
-            if (recipe.author.toString() !== req.user.sub.toString()) {
+            if (recipe.author.toString() !== req.user._id.toString()) {
                 return res.status(403).json({ message: 'You do not have permission to update this recipe' });
             }
 
@@ -203,9 +199,9 @@ router.put('/update-recipe/:recipeId',
         }
     });
 
-router.get('/favorites', 
+router.get('/favorites',
     async (req, res) => {
-        const userId = req.user.sub
+        const userId = req.user._id
         const user = await User.findById(userId)
             .populate({
                 path: 'favorites',
@@ -222,7 +218,7 @@ router.get('/favorites',
 
     })
 
-router.get('/:recipeId', 
+router.get('/:recipeId',
     async (req, res) => {
         const { recipeId } = req.params
 
@@ -252,9 +248,9 @@ router.get('/category/:categoryId',
             const { cookingTime, difficulty, servingSize } = req.query;
 
             const filter = { category: categoryId };
-            if (cookingTime) filter.cookingTime =  cookingTime ;
+            if (cookingTime) filter.cookingTime = cookingTime;
             if (difficulty) filter.difficultyLevel = difficulty;
-            if (servingSize) filter.servingSize =  servingSize ;
+            if (servingSize) filter.servingSize = servingSize;
 
 
             console.log(filter)
@@ -275,7 +271,7 @@ router.get('/category/:categoryId',
     }
 )
 
-router.get('/user/:userId', 
+router.get('/user/:userId',
     async (req, res) => {
         try {
             const { userId } = req.params

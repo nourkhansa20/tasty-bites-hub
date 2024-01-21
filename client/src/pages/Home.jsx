@@ -2,12 +2,8 @@ import React, { useEffect, useState } from 'react'
 import axiosClient from '../axios-client';
 import cookingBackground from './../assets/images/cooking-background.jpg'
 import HomeCategory from '../components/HomeCategory';
-import axios from 'axios';
-import { useAuth0 } from '@auth0/auth0-react';
-import { jwtDecode } from "jwt-decode";
 
 function Home() {
-  const { getAccessTokenSilently } = useAuth0();
   const [categories, setCategories] = useState()
 
   useEffect(() => {

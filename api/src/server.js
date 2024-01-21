@@ -5,6 +5,8 @@ const session = require('express-session')
 const MongoStore = require('connect-mongo')
 const cors = require('cors')
 const path = require('path')
+const bodyParser = require('body-parser');
+
 
 //Routes
 const authRoute = require("./routes/auth")
@@ -35,7 +37,7 @@ server.use(cookie_parser())
 // }))
 // server.use(passport.initialize())
 // server.use(passport.session())
-
+// server.use(bodyParser.json());
 
 server.use('/api/auth/', authRoute)
 server.use('/api/user/', userRoute)
