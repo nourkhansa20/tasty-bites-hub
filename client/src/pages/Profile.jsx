@@ -4,23 +4,23 @@ import axiosClient from '../axios-client';
 import RecipePost from '../components/RecipePost';
 import FollowButton from '../components/FollowButton';
 import CustomButton from '../components/CustomButton';
+import { useAuth0 } from '@auth0/auth0-react';
+import LogoutButton from '../components/LogoutButton';
 
 function Profile() {
 
     const { profileID } = useParams();
     const [recipes, setRecipes] = useState()
-    const [user, setUser] = useState()
+    const [userP, setUser] = useState()
     const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        fetchData();
-    }, [profileID])
-
+    const { user } = useAuth0()
 
     const fetchData = async () => {
         try {
             const recipesDB = await axiosClient.get(`/recipe/user/${profileID}`)
             const userData = await axiosClient.get(`/user/id/${profileID}`)
+            console.log(userData.data)
+            console.log(recipesDB.data)
             setRecipes(recipesDB.data)
             setUser(userData.data)
         } catch (err) {
@@ -30,6 +30,11 @@ function Profile() {
         }
 
     }
+
+    useEffect(() => {
+        fetchData();
+    }, [profileID])
+
 
     const logout = () => {
         localStorage.removeItem('ACCESS_TOKEN')
@@ -45,25 +50,31 @@ function Profile() {
             <div className='mt-28'>
                 <div className=' flex  justify-center items-center mb-12'>
                     <div className=' w-2/3 flex gap-8  md:flex-row flex-col items-center '  >
-                        <div className='bg-black h-[25ex] w-[25ex] rounded-xl'></div>
+                        {
+                            user.sub !== userP.googleId ?
+                                <img className=' h-[25ex] w-[25ex] rounded-xl' src={userP.profilePicture} />
+                                :
+                                <img className=' h-[25ex] w-[25ex] rounded-xl' src={user.picture} />
+
+                        }
                         <div className='lg:ml-4 mt-5'>
                             <div className='flex flex-col md:flex-row items-center mb-4 gap-4'>
-                                <div className='text-[3ex] '>{user && user.username}</div>
+                                <div className='text-[3ex] '>{userP && userP.username}</div>
                                 {
-                                    localStorage.getItem('USER_ID') !== user._id ?
-                                        <FollowButton userId={user && user._id} style={'w-[18ex] h-[4ex]'} />
+                                    user.sub !== userP.googleId ?
+                                        <FollowButton userId={userP && userP._id} style={'w-[18ex] h-[4ex]'} />
                                         :
-                                        <CustomButton label={'Logout'} style={'w-[17ex] h-10'} onClick={logout} />
+                                        <LogoutButton label={'Logout'} style={'w-[17ex] h-10'} onClick={logout} />
                                 }
 
                             </div>
 
                             <div className=' mt-5 flex gap-8 md:text-[2.2ex] mb-4 text-[1.3ex]'>
                                 <div><span className='font-semibold'>{recipes && recipes.length}</span> recipes</div>
-                                <div><span className='font-semibold'>{user && user.followers.length}</span> followers</div>
-                                <div><span className='font-semibold'>{user && user.following.length}</span> following</div>
+                                <div><span className='font-semibold'>{userP && userP.followers.length}</span> followers</div>
+                                <div><span className='font-semibold'>{userP && userP.following.length}</span> following</div>
                             </div>
-                            <div>{user.bio ? user.bio : "lorecahifhijAKPSCJBZCLKlsss"}</div>
+                            {/* <div>{userP.bio ? userP.bio : "lorecahifhijAKPSCJBZCLKlsss"}</div> */}
                         </div>
 
 

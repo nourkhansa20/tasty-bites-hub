@@ -4,7 +4,7 @@ const { jwtCheck } = require('../strategies/auth0')
 const { default: mongoose } = require('mongoose')
 const router = Router()
 
-router.get('/',jwtCheck,
+router.get('/', jwtCheck,
     async (req, res) => {
         const userDB = await User.find()
         if (userDB) {
@@ -26,11 +26,14 @@ router.get('/:email', jwtCheck,
         }
     })
 
-router.get('/id/:userId', jwtCheck,
+router.get('/id/:googleId', jwtCheck,
     async (req, res) => {
         try {
-            const { userId } = req.params
-            const userDB = await User.findById(userId).select("username bio followers following")
+
+            const { googleId } = req.params
+            console.log(googleId)
+            const user = await User.findOne({ googleId })
+            const userDB = await User.findById(user._id).select("username bio followers following googleId profilePicture")
             if (userDB) {
                 res.status(200).json(userDB)
             } else {
@@ -46,9 +49,10 @@ router.post("/user-follow/:id", jwtCheck,
     async (req, res) => {
         try {
             const userFollowId = req.params.id;
-            const userId = req.user._id;
-
-            // Validate if the provided userFollowId is a valid MongoDB ObjectId
+            const googleId = req.auth.payload.sub
+            const user = await User.findOne({ googleId: googleId });
+            console.log(user)
+            const userId = user._id
             if (!mongoose.Types.ObjectId.isValid(userFollowId)) {
                 return res.status(400).json({ message: 'Invalid userFollowId' });
             }
@@ -85,7 +89,7 @@ router.get('/is-user-following/:followingId', jwtCheck,
     async (req, res) => {
         try {
             const { followingId } = req.params;
-            const followerId = req.user._id
+            const followerId = await User.findOne({ googleId: req.auth.payload.sub })._id
 
             if (!mongoose.Types.ObjectId.isValid(followerId) || !mongoose.Types.ObjectId.isValid(followingId)) {
                 throw new Error('Invalid user IDs');

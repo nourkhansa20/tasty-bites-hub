@@ -6,30 +6,7 @@ import axiosClient from '../axios-client';
 
 function DefaultLayout() {
 
-  const fetchData = async () => {
-
-    axiosClient.interceptors.request.use(
-      async (config) => {
-        const token = await getAccessTokenSilently();
-        if (token) {
-          config.headers.Authorization = "Bearer" + " " + token;
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
-    );
-
-    const response = await axiosClient.post('/auth/checkOrCreateUser')
-    console.log(response.data)
-  }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, isLoading } = useAuth0();
 
   if (isLoading) {
     return <>Loading ....</>

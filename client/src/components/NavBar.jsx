@@ -4,9 +4,10 @@ import Pizza from './../assets/images/pizza.jpg'
 import Logo from '../assets/images/logo.png'
 import { FaTimes } from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
+import { useAuth0 } from '@auth0/auth0-react';
 
 function NavBar() {
-  const profileId = localStorage.getItem('USER_ID')
+  const { user } = useAuth0()
   const [nav, setNav] = useState(false)
 
   const menu = [
@@ -25,10 +26,11 @@ function NavBar() {
     }, {
       id: 4,
       name: 'PROFILE',
-      path: `/profile/${profileId}`
+      path: `/profile/${user.sub}`
     }
 
   ]
+
   return (
     <div className='w-screen fixed top-0 h-[10ex] bg-[#6D041D] flex items-center justify-between p-9 z-10 '>
       <Link to='/home' className='text-white cursor-pointer'>
@@ -46,8 +48,8 @@ function NavBar() {
           }
         </ul>
 
-        <Link to={`/profile/${profileId}`} >
-          <img src={Pizza} className='w-[5ex] h-[5ex] rounded-lg' alt="" />
+        <Link to={`/profile/${user.sub}`} >
+          <img src={user.picture} className='w-[5ex] h-[5ex] rounded-lg' alt="" />
         </Link>
       </div>
 

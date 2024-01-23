@@ -24,7 +24,7 @@ function RecipeCard({ recipe }) {
 
                         <div className='mt-6 flex items-center w-[31ex] justify-between '>
                             <div>
-                                <Link to={`/profile/${recipe.author._id }`} className='cursor-pointer hover:underline underline-offset-2 inline-block'>{author && author.username}</Link>
+                                <Link to={`/profile/${recipe.author.googleId }`} className='cursor-pointer hover:underline underline-offset-2 inline-block'>{author && author.username}</Link>
                             </div>
                             <FavoriteIcon recipeID={id} />
                         </div>

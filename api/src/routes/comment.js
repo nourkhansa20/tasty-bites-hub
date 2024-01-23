@@ -1,7 +1,8 @@
 const { Router } = require('express')
 const Comment = require('../database/modules/Comment');
 const Recipe = require('../database/modules/Recipe');
-const { jwtCheck } = require('../strategies/auth0')
+const { jwtCheck } = require('../strategies/auth0');
+const User = require('../database/modules/User');
 
 const router = Router()
 
@@ -33,8 +34,9 @@ router.post('/create', jwtCheck,
                 return res.status(404).json({ message: 'Recipe not found' });
             }
 
+            const userId = User.findOne({googleId : req.auth.payload.sub})._id
             const newComment = new Comment({
-                user: req.user._id,
+                user: userId,
                 text,
                 recipe: recipeId
             })

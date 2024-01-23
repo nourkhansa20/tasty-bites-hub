@@ -46,19 +46,25 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/checkOrCreateUser', jwtCheck, async (req, res) => {
-    const googleId = req.auth.payload.sub.split('|')[1]
-    console.log(googleId)
+
+    const googleId = req.auth.payload.sub
+    const user = req.body
+
     try {
-        // Check if user exists in the database
         const existingUser = await User.findOne({ googleId: googleId });
-        console.log(existingUser)
+
         if (existingUser) {
-            // User exists
             res.status(200).json({ message: 'User already exists', user: existingUser });
         } else {
-            // User doesn't exist, create a new user
             console.log("New User")
-            const newUser = new User({ googleId: googleId });
+            const newUser = new User({
+                googleId: googleId,
+                username: user.nickname,
+                name: user.name,
+                email: user.email,
+                profilePicture: user.picture
+            });
+
             await newUser.save();
             res.status(201).json({ message: 'User created successfully', user: newUser });
         }

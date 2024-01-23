@@ -10,42 +10,23 @@ function Login() {
   if (isLoading) {
     return <div>Loading ...</div>;
   }
-  const fetchData = async () => {
 
-    // console.log(user.accessToken)
-    // localStorage.setItem('ACCESS_TOKEN', user?.idToken)
-
-  }
-
-  useEffect(() => {
-    fetchData()
-  })
-
-  const getRecipe = async () => {
-    const token = await getAccessTokenSilently();
-    const response = await axios.get('https://localhost:3001/api/recipe', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    console.log(categories.data)
-}
-return (
-  isAuthenticated ? (
-    <div>
-      <img src={user.picture} alt={user.name} />
-      <h2>{user.name}</h2>
-      <p>{user.email}</p>
-      <button onClick={() => getRecipe()}>get</button>
-      <br></br>
-      <br></br>
-      <br></br>
-      <LogoutButton />
-    </div>
-  ) : (
-    <LoginButton />
-  )
-);
+  return (
+    isAuthenticated ? (
+      <div>
+        <img src={user.picture} alt={user.name} />
+        <h2>{user.name}</h2>
+        <p>{user.email}</p>
+        <button onClick={() => getRecipe()}>get</button>
+        <br></br>
+        <br></br>
+        <br></br>
+        <LogoutButton />
+      </div>
+    ) : (
+      <LoginButton />
+    )
+  );
 }
 
 export default Login

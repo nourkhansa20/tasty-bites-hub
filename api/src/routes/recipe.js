@@ -35,7 +35,7 @@ router.get('/',
             }
 
             const recipesPromises = categories.map(async (category) => {
-                const recipes = await Recipe.find({ category: category._id }).limit(4).populate('category').populate({ path: "author", select: 'username _id' });
+                const recipes = await Recipe.find({ category: category._id }).limit(4).populate('category').populate({ path: "author", select: 'username _id googleId' });
                 return recipes
             });
 
@@ -54,9 +54,13 @@ router.post('/create',
         try {
             const { title, ingredients, steps, cookingTime, difficultyLevel, servingSize, tags, category } = req.body;
 
+            const googleId = req.auth.payload.sub
+
+            const user = await User.findOne({ googleId })
+            console.log(user._id)
             const newRecipe = new Recipe({
                 title,
-                author: req.user._id,
+                author: user._id,
                 ingredients,
                 steps,
                 cookingTime,
@@ -67,7 +71,7 @@ router.post('/create',
             });
 
             await newRecipe.save();
-            await User.findByIdAndUpdate(req.user._id, { $push: { recipes: newRecipe._id } });
+            await User.findByIdAndUpdate(user._id, { $push: { recipes: newRecipe._id } });
 
             res.status(201).json({ message: 'Recipe added successfully', recipe: newRecipe });
 
@@ -118,17 +122,17 @@ router.post('/add-to-favorites/:recipeId',
                 return res.status(404).json({ message: 'Recipe not found' });
             }
 
-            const userId = req.user._id;
+            const googleId = req.auth.payload.sub
 
-            const user = await User.findById(userId);
+            const user = await User.findOne({ googleId });
 
             if (user.favorites.includes(recipeId)) {
 
-                await User.findByIdAndUpdate(userId, { $pull: { favorites: recipeId } });
+                await User.updateOne({ googleId }, { $pull: { favorites: recipeId } });
                 res.status(200).json({ message: false });
             } else {
 
-                await User.findByIdAndUpdate(userId, { $addToSet: { favorites: recipeId } });
+                await User.updateOne({ googleId }, { $addToSet: { favorites: recipeId } });
                 res.status(200).json({ message: true });
             }
         } catch (error) {
@@ -147,9 +151,11 @@ router.get('/is-favorite/:recipeId',
                 return res.status(404).json({ message: 'Recipe not found' });
             }
 
-            const userId = req.user._id;
+            const googleId = req.auth.payload.sub
 
-            const user = await User.findById(userId);
+            const user = await User.findOne({ googleId });
+
+            console.log(user)
 
             if (user.favorites.includes(recipeId)) {
                 res.status(200).json({ isFavorite: true });
@@ -201,13 +207,13 @@ router.put('/update-recipe/:recipeId',
 
 router.get('/favorites',
     async (req, res) => {
-        const userId = req.user._id
-        const user = await User.findById(userId)
+        const googleId = req.auth.payload.sub
+        const user = await User.findOne({ googleId })
             .populate({
                 path: 'favorites',
                 populate: {
                     path: "author",
-                    select: "username _id"
+                    select: "username _id googleId"
                 }
             })
 
@@ -226,12 +232,12 @@ router.get('/:recipeId',
             .populate('category')
             .populate({
                 path: 'author',
-                select: 'username _id'
+                select: 'username _id googleId'
             })
             .populate({
                 path: 'comments',
                 options: { sort: { createdAt: -1 } },
-                populate: { path: 'user', select: 'username _id' }
+                populate: { path: 'user', select: 'username _id googleId' }
             })
         if (recipeDB) {
             res.status(200).json(recipeDB)
@@ -257,7 +263,7 @@ router.get('/category/:categoryId',
             const recipes = await Recipe.find(filter)
                 .populate({
                     path: 'author',
-                    select: 'username _id'
+                    select: 'username _id googleId'
                 })
             console.log(recipes)
             if (!recipes) {
@@ -271,16 +277,16 @@ router.get('/category/:categoryId',
     }
 )
 
-router.get('/user/:userId',
+router.get('/user/:googleId',
     async (req, res) => {
         try {
-            const { userId } = req.params
-            const user = await User.findById(userId)
-            console.log(user)
+            const { googleId } = req.params
+            const user = await User.findOne({ googleId })
+
             if (!user) {
                 res.status(403).json({ message: "User No Found" })
             } else {
-                const recipes = await Recipe.find({ author: userId }).populate('category')
+                const recipes = await Recipe.find({ author: user._id }).populate('category')
                 res.status(200).json(recipes)
             }
         } catch (err) {
