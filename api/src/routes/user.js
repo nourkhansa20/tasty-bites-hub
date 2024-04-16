@@ -4,7 +4,7 @@ const { jwtCheck } = require('../strategies/auth0')
 const { default: mongoose } = require('mongoose')
 const router = Router()
 
-router.get('/', jwtCheck,
+router.get('/',jwtCheck,
     async (req, res) => {
         const userDB = await User.find()
         if (userDB) {
@@ -18,7 +18,6 @@ router.get('/:email', jwtCheck,
     async (req, res) => {
         const { email } = req.params
         const userDB = await User.findOne({ email })
-        console.log(userDB)
         if (userDB) {
             res.status(200).json(userDB)
         } else {
@@ -26,12 +25,11 @@ router.get('/:email', jwtCheck,
         }
     })
 
-router.get('/id/:googleId', jwtCheck,
+router.get('/id/:googleId',
     async (req, res) => {
         try {
 
             const { googleId } = req.params
-            console.log(googleId)
             const user = await User.findOne({ googleId })
             const userDB = await User.findById(user._id).select("username bio followers following googleId profilePicture")
             if (userDB) {
@@ -51,7 +49,6 @@ router.post("/user-follow/:id", jwtCheck,
             const userFollowId = req.params.id;
             const googleId = req.auth.payload.sub
             const user = await User.findOne({ googleId: googleId });
-            console.log(user)
             const userId = user._id
             if (!mongoose.Types.ObjectId.isValid(userFollowId)) {
                 return res.status(400).json({ message: 'Invalid userFollowId' });
@@ -89,13 +86,12 @@ router.get('/is-user-following/:followingId', jwtCheck,
     async (req, res) => {
         try {
             const { followingId } = req.params;
-            const followerId = await User.findOne({ googleId: req.auth.payload.sub })._id
-
-            if (!mongoose.Types.ObjectId.isValid(followerId) || !mongoose.Types.ObjectId.isValid(followingId)) {
+            const followerId = await User.findOne({ googleId: req.auth.payload.sub })
+            if (!mongoose.Types.ObjectId.isValid(followerId._id) || !mongoose.Types.ObjectId.isValid(followingId)) {
                 throw new Error('Invalid user IDs');
             }
 
-            const follower = await User.findById(followerId);
+            const follower = await User.findById(followerId._id);
             if (!follower) {
                 throw new Error('Follower not found');
             }

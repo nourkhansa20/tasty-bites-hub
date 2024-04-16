@@ -51,20 +51,21 @@ function Profile() {
                 <div className=' flex  justify-center items-center mb-12'>
                     <div className=' w-2/3 flex gap-8  md:flex-row flex-col items-center '  >
                         {
-                            user.sub !== userP.googleId ?
-                                <img className=' h-[25ex] w-[25ex] rounded-xl' src={userP.profilePicture} />
+                            user?.sub == userP?.googleId ?
+                                <img className=' h-[25ex] w-[25ex] rounded-xl' src={user && user.picture} />
                                 :
-                                <img className=' h-[25ex] w-[25ex] rounded-xl' src={user.picture} />
+                                <img className=' h-[25ex] w-[25ex] rounded-xl' src={userP.profilePicture} />
+
 
                         }
                         <div className='lg:ml-4 mt-5'>
                             <div className='flex flex-col md:flex-row items-center mb-4 gap-4'>
                                 <div className='text-[3ex] '>{userP && userP.username}</div>
                                 {
-                                    user.sub !== userP.googleId ?
-                                        <FollowButton userId={userP && userP._id} style={'w-[18ex] h-[4ex]'} />
-                                        :
+                                    user?.sub == userP?.googleId ?
                                         <LogoutButton label={'Logout'} style={'w-[17ex] h-10'} onClick={logout} />
+                                        :
+                                        <FollowButton userId={userP && userP._id} style={'w-[18ex] h-[4ex]'} />
                                 }
 
                             </div>

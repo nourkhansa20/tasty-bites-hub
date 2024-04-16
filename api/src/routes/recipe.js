@@ -24,8 +24,6 @@ const upload = multer({ storage })
 
 const router = Router()
 
-router.use(jwtCheck)
-
 router.get('/',
     async (req, res) => {
         try {
@@ -49,7 +47,7 @@ router.get('/',
     }
 )
 
-router.post('/create',
+router.post('/create',jwtCheck,
     async (req, res) => {
         try {
             const { title, ingredients, steps, cookingTime, difficultyLevel, servingSize, tags, category } = req.body;
@@ -80,13 +78,13 @@ router.post('/create',
         }
     })
 
-router.post('/save-recipe-photo/:recipeId', upload.single('photo'),
+router.post('/save-recipe-photo/:recipeId', upload.single('photo'),jwtCheck,
     (req, res) => {
         res.status(200).json({ message: "image uploaded" })
     }
 )
 
-router.delete('/delete/:recipeId',
+router.delete('/delete/:recipeId',jwtCheck,
     async (req, res) => {
         try {
             const { recipeId } = req.params;
@@ -112,7 +110,7 @@ router.delete('/delete/:recipeId',
     });
 
 
-router.post('/add-to-favorites/:recipeId',
+router.post('/add-to-favorites/:recipeId',jwtCheck,
     async (req, res) => {
         try {
             const { recipeId } = req.params;
@@ -141,7 +139,7 @@ router.post('/add-to-favorites/:recipeId',
         }
     });
 
-router.get('/is-favorite/:recipeId',
+router.get('/is-favorite/:recipeId',jwtCheck,
     async (req, res) => {
         try {
             const { recipeId } = req.params;
@@ -168,7 +166,7 @@ router.get('/is-favorite/:recipeId',
         }
     });
 
-router.put('/update-recipe/:recipeId',
+router.put('/update-recipe/:recipeId',jwtCheck,
     async (req, res) => {
         try {
             const { recipeId } = req.params;
@@ -205,7 +203,7 @@ router.put('/update-recipe/:recipeId',
         }
     });
 
-router.get('/favorites',
+router.get('/favorites',jwtCheck,
     async (req, res) => {
         const googleId = req.auth.payload.sub
         const user = await User.findOne({ googleId })

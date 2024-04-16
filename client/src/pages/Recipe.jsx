@@ -6,6 +6,7 @@ import CustomTextArea from '../components/CustomTextArea';
 import CustomButton from '../components/CustomButton';
 import FavoriteIcon from '../components/FavoriteIcon';
 import FollowButton from '../components/FollowButton';
+import { useAuth0 } from '@auth0/auth0-react';
 
 
 function Recipe() {
@@ -38,16 +39,18 @@ function Recipe() {
     const [comments, setComments] = useState();
     const [authorId, setAuthorId] = useState()
     const [loading, setLoading] = useState(true);
-    const recipeImageUrl = 'http://localhost:3001/images/recipes/'; 
+    const {isAuthenticated , user} = useAuth0()
+    const recipeImageUrl = 'http://localhost:3001/images/recipes/';
 
     const handelComment = async () => {
+        if(isAuthenticated){
         const comment = commentRef.current.value
         const commentFrom = {
             recipeId: recipeID,
             text: comment,
         }
         await axiosClient.post('/comment/create', commentFrom)
-        const username = localStorage.getItem('USERNAME')
+        const username = user.nickname
         const addComment = {
             recipeId: recipeID,
             text: comment,
@@ -59,6 +62,9 @@ function Recipe() {
         commentRef.current.value = ""
 
         setComments([addComment, ...comments])
+    }else{
+        alert("You Should login")
+    }
     }
     if (loading) {
         return <p>Loading...</p>;
@@ -72,12 +78,12 @@ function Recipe() {
                             <FavoriteIcon recipeID={recipeID} />
                         </div>
                         <div className='w-full flex flex-col md:flex-row md:items-center mb-2'>
-                            Made by : <Link to={`/profile/${recipe.author._id}`} className='text-[1.9ex] cursor-pointer hover:underline underline-offset-2'> { recipe ?" "+ recipe.author.username : ""}</Link>
+                            Made by : <Link to={`/profile/${recipe.author.googleId}`} className='text-[1.9ex] cursor-pointer hover:underline underline-offset-2'> {recipe ? " " + recipe.author.username : ""}</Link>
 
                             {
-                                    localStorage.getItem('USER_ID') !== authorId &&
-                                    <FollowButton userId={authorId && authorId} style={'w-[18ex] h-[4ex]'} />
-                                }
+                                localStorage.getItem('USER_ID') !== authorId &&
+                                <FollowButton userId={authorId && authorId} style={'w-[18ex] h-[4ex]'} />
+                            }
                         </div>
                         <h3 className='text-[1.7ex] mb-2'>Category : {recipe ? recipe.category.name : ""}</h3>
                         <h3 className='text-[1.7ex] mb-2'>Difficulity : {recipe ? recipe.difficultyLevel : ""}</h3>
@@ -86,8 +92,8 @@ function Recipe() {
                             <h2 className='text-[3ex] mb-2'>Ingredient</h2>
                             <div className="grid md:grid-cols-2 w-[40ex]">
                                 {ingredient ? (
-                                    ingredient.map((item) => (
-                                        < >
+                                    ingredient.map((item, index) => (
+                                        <>
                                             <div className=''>- {item.quantity}</div>
                                             <div className=''> {item.name}</div>
                                         </>
@@ -101,8 +107,8 @@ function Recipe() {
                         <div className='w-full'>
                             <h2 className='text-[3ex] mb-2 mt-5'>Steps</h2>
                             {steps ? (
-                                steps.map((step) => (
-                                    <div key={steps._id} className='w-full text-wrap overflow-hidden '>- {step}</div>
+                                steps.map((step, index) => (
+                                    <div key={index} className='w-full text-wrap overflow-hidden '>- {step}</div>
                                 ))
                             ) : (
                                 <p>No steps available</p>
@@ -110,9 +116,9 @@ function Recipe() {
                         </div>
                     </div>
 
-                    <img src={`${recipeImageUrl}${recipe._id}.jpg`} className='2xl:w-[50ex] 2xl:h-[50ex] sm:w-[50ex] sm:h-[50ex] w-[23ex] h-[23ex] rounded-2xl 2xl:ml-[ex] mt-4 lg:mt-0  object-cover'/>
+                    <img src={`${recipeImageUrl}${recipe._id}.jpg`} className='2xl:w-[50ex] 2xl:h-[50ex] sm:w-[50ex] sm:h-[50ex] w-[23ex] h-[23ex] rounded-2xl 2xl:ml-[ex] mt-4 lg:mt-0  object-cover' />
 
-                </div>
+                </div >
                 <br />
                 <br />
                 <div className='shadow-lg shadow-[#A79086] rounded-lg p-10 bg-[#deded4] w-3/4 mb-20'>
@@ -134,7 +140,7 @@ function Recipe() {
                             : "No Comments avialable"
                     )}
                 </div>
-            </div>
+            </div >
         )
     }
 

@@ -24,10 +24,10 @@ function RecipePost({ recipe }) {
                         <div className="grid grid-cols-2 w-full">
                             {recipe.ingredients ? (
                                 recipe.ingredients.map((item, index) => (
-                                    <div key={index}>
+                                    <>
                                         <div className=''>- {item.quantity}</div>
                                         <div className=''> {item.name}</div>
-                                    </div>
+                                    </>
                                 ))
                             ) : (
                                 <p>No ingredients available</p>

@@ -5,9 +5,10 @@ import Logo from '../assets/images/logo.png'
 import { FaTimes } from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
 import { useAuth0 } from '@auth0/auth0-react';
+import LoginButton from './LoginButton';
 
 function NavBar() {
-  const { user } = useAuth0()
+  const { user, isAuthenticated } = useAuth0()
   const [nav, setNav] = useState(false)
 
   const menu = [
@@ -21,36 +22,46 @@ function NavBar() {
       path: '/create-recipe'
     }, {
       id: 3,
-      name: 'FAVORITR',
+      name: 'FAVORITE',
       path: '/favorite'
     }, {
       id: 4,
       name: 'PROFILE',
-      path: `/profile/${user.sub}`
+      path: `/profile/${user && user.sub}`
     }
 
   ]
 
   return (
     <div className='w-screen fixed top-0 h-[10ex] bg-[#6D041D] flex items-center justify-between p-9 z-10 '>
-      <Link to='/home' className='text-white cursor-pointer'>
+      <Link to='/home' className='text-white cursor-pointer '>
         <img src={Logo} alt='Logo Image' className='w-[20ex] h-[5ex]' />
       </Link>
 
       <div className='md:flex hidden justify-between items-center text-[#dcdcd0] '>
-        <ul className='flex gap-5 mr-16 '>
+        <ul className='flex gap-5 mr-10 '>
           {
-            menu.map((item, index) => index < 3 && (
-              <li key={item.id} className='hover:scale-105 transition-all duration-200 cursor-pointer'>
-                <Link to={item.path} >{item.name}</Link>
-              </li>
-            ))
+            isAuthenticated && (
+              menu.map((item, index) => index < 3 && (
+                <li key={item.id} className='hover:scale-105 transition-all duration-200 cursor-pointer'>
+                  <Link to={item.path} >{item.name}</Link>
+                </li>
+              ))
+            )
           }
         </ul>
 
-        <Link to={`/profile/${user.sub}`} >
-          <img src={user.picture} className='w-[5ex] h-[5ex] rounded-lg' alt="" />
-        </Link>
+        {
+          isAuthenticated ? (
+            <Link to={`/profile/${user && user.sub}`} >
+              <img src={user.picture} className='w-[5ex] h-[5ex] rounded-lg  mr-5' alt="" />
+            </Link>
+          ) : (
+            <LoginButton />
+          )
+
+        }
+
       </div>
 
 

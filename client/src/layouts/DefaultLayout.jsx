@@ -12,12 +12,6 @@ function DefaultLayout() {
     return <>Loading ....</>
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />
-  } else {
-
-  }
-
   return (
     <div>
       <NavBar />

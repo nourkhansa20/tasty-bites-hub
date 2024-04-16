@@ -4,6 +4,9 @@ import { Auth0Provider } from '@auth0/auth0-react';
 import { RouterProvider } from 'react-router-dom'
 import router from './routes.jsx'
 import './index.css'
+import { disableReactDevTools } from '@fvilers/disable-react-devtools';
+
+if(process.env.NODE_ENV==='production') disableReactDevTools()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

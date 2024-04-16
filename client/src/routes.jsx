@@ -12,20 +12,7 @@ import Profile from './pages/Profile';
 import Signup from './pages/Signup';
 
 const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <GuestLayout />,
-        children: [
-            {
-                path: '/login',
-                element: <Login />
-            },
-            {
-                path: '/singup',
-                element: <Signup />
-            },
-        ]
-    },
+
     {
         path: '/',
         element: <DefaultLayout />,
@@ -53,14 +40,27 @@ const router = createBrowserRouter([
             {
                 path: 'favorite',
                 element: <Favorite />
-            }, 
+            },
             {
                 path: 'profile/:profileID',
                 element: <Profile />
-            }, 
+            },
         ]
     },
-
+    {
+        path: '/',
+        element: <GuestLayout />,
+        children: [
+            // {
+            //     path: '/login',
+            //     element: <Login />
+            // },
+            {
+                path: '/singup',
+                element: <Signup />
+            },
+        ]
+    },
 
     {
         path: "*",

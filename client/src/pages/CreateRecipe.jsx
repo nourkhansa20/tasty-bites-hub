@@ -59,25 +59,48 @@ function CreateRecipe() {
     const createRecipe = async () => {
         await getIngredients()
         await getSteps()
-        const recipe = {
-            title: titleRef.current.value,
-            ingredients,
-            steps,
-            cookingTime: cookingTime.value,
-            difficultyLevel: difficultyLevel.value,
-            servingSize: servingSize.value,
-            category: category.value
+        if (!titleRef.current.value) {
+            alert("Title require")
         }
-        console.log(recipe)
-        const newRecipe = await axiosClient.post('/recipe/create', recipe)
-        await axiosClient.post(`/recipe/save-recipe-photo/${newRecipe.data.recipe._id}`, image)
-        navigate(`/recipe/${newRecipe.data.recipe._id}`)
-        ingredients.length = 0;
-        steps.length = 0;
+        if (ingredients.length === 0) {
+            alert("You should add at least 1 ingredients")
+        }
+        if (steps.length === 0) {
+            alert("You should add at least 1 steps")
+        }
+        if (!cookingTime) {
+            alert("Cooking time require")
+        }
+        if (!difficultyLevel) {
+            alert("Difficulty Level require")
+        }
+        if (!servingSize) {
+            alert("Serving size require")
+        }
+        if (!category) {
+            alert("Category require")
+        }
+        if (titleRef.current.value && cookingTime && difficultyLevel && servingSize && category && ingredients.length !== 0 && steps.length !== 0) {
+            const recipe = {
+                title: titleRef.current.value,
+                ingredients,
+                steps,
+                cookingTime: cookingTime.value,
+                difficultyLevel: difficultyLevel.value,
+                servingSize: servingSize.value,
+                category: category.value
+            }
+            console.log(recipe)
+            const newRecipe = await axiosClient.post('/recipe/create', recipe)
+            await axiosClient.post(`/recipe/save-recipe-photo/${newRecipe.data.recipe._id}`, image)
+            navigate(`/recipe/${newRecipe.data.recipe._id}`)
+            ingredients.length = 0;
+            steps.length = 0;
+        }
     }
 
     const titleRef = useRef()
-    
+
     const [ingredientIndex, setIngredientIndexy] = useState(1)
     const [ingredientsT, setIngredientT] = useState([ingredientIndex])
 

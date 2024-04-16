@@ -34,7 +34,8 @@ router.post('/create', jwtCheck,
                 return res.status(404).json({ message: 'Recipe not found' });
             }
 
-            const userId = User.findOne({googleId : req.auth.payload.sub})._id
+            const userDB = await User.findOne({googleId : req.auth.payload.sub})
+            const userId = userDB._id
             const newComment = new Comment({
                 user: userId,
                 text,
